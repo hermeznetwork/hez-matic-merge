@@ -4,7 +4,6 @@ pragma solidity 0.6.12;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "hardhat/console.sol";
 
 contract TokenMerge {
     using SafeMath for uint256;
@@ -18,7 +17,6 @@ contract TokenMerge {
     bytes4 constant _APPROVE_SIGNATURE = 0x095ea7b3;
 
     address constant BURN_ADDRESS = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
-    uint256 public constant TIMEOUT = 172800; // 1 month
     uint256 public constant RATIO = 35000; // 3.5
 
     address fromToken;
@@ -33,12 +31,13 @@ contract TokenMerge {
       address _fromToken,
       address _toToken,
       address _sourceAddress,
-      uint256 _amountLoadToToken
+      uint256 _amountLoadToToken,
+      uint256 _timeout
     ) public {
         fromToken = _fromToken;
         toToken = _toToken;
         sourceAddress = _sourceAddress;
-        timeout = block.number + TIMEOUT;
+        timeout = block.number + _timeout;
         amountLoadToToken = _amountLoadToToken;
         readyToMerge = false;
     }

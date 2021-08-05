@@ -5,12 +5,14 @@
     "test": "npx hardhat test"
   },
   "dependencies": {
+    "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/contracts": "^3.1.0",
     "@openzeppelin/test-helpers": "^0.5.6",
     "dotenv": "^10.0.0",
     "eslint": "^7.32.0",
     "ffjavascript": "^0.2.38",
-    "hardhat": "^2.5.0"
+    "hardhat": "^2.5.0",
+    "web3": "^1.5.1"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",

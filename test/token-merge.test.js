@@ -6,6 +6,7 @@ const { time } = require("@openzeppelin/test-helpers");
 const utilsHelpers = require("./helpers/utils");
 
 describe("TokenMerge", function () {
+    const timeout = 100;
     const amountLoadToToken = utilsHelpers.to18(100);
 
     const fromTokenName = "A_Token";
@@ -74,7 +75,8 @@ describe("TokenMerge", function () {
             insFromERC20.address,
             insToERC20.address,
             sourceTo.address,
-            amountLoadToToken
+            amountLoadToToken,
+            timeout
         );
 
         await insTokenMerge.deployed();
@@ -161,19 +163,18 @@ describe("TokenMerge", function () {
     it("getLeftOver: succesful call", async () => {
         // advance blocks
         const timeoutBlocks = await insTokenMerge.timeout();
-        const currentBlock = await time.latestBlock();
-        await time.advanceBlockTo(currentBlock.toNumber() + 1);
+        await time.advanceBlockTo(timeoutBlocks.toNumber() + 1);
 
         const balanceContract = await insToERC20.balanceOf(insTokenMerge.address);
         const balanceSource = await insToERC20.balanceOf(sourceTo.address);
 
-        // await insTokenMerge.connect(sourceTo).getLeftOver();
+        await insTokenMerge.connect(sourceTo).getLeftOver();
 
-        // const newBalanceContract = await insToERC20.balanceOf(insTokenMerge.address);
-        // const newBalanceSource = await insToERC20.balanceOf(sourceTo.address);
+        const newBalanceContract = await insToERC20.balanceOf(insTokenMerge.address);
+        const newBalanceSource = await insToERC20.balanceOf(sourceTo.address);
 
-        // expect(Scalar.eq(newBalanceContract, 0)).to.be.equal(true);
-        // expect(Scalar.eq(newBalanceSource, Scalar.add(balanceContract, balanceSource)))
-        //     .to.be.equal(true);
+        expect(Scalar.eq(newBalanceContract, 0)).to.be.equal(true);
+        expect(Scalar.eq(newBalanceSource, Scalar.add(balanceContract, balanceSource)))
+            .to.be.equal(true);
     });
 });
