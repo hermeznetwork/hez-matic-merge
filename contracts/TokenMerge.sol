@@ -17,16 +17,15 @@ contract TokenMerge {
     // bytes4(keccak256(bytes("approve(address,uint256)")));
     bytes4 constant _APPROVE_SIGNATURE = 0x095ea7b3;
 
-
-    address constant BURN_ADDRESS = address(0);
-    uint256 constant TIMEOUT = 172800; // 1 month
-    uint256 constant RATIO = 35000; // 3.5
+    address constant BURN_ADDRESS = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
+    uint256 public constant TIMEOUT = 172800; // 1 month
+    uint256 public constant RATIO = 35000; // 3.5
 
     address fromToken;
     address toToken;
     address sourceAddress;
     uint256 ratio;
-    uint256 timeout;
+    uint256 public timeout;
     uint256 amountLoadToToken;
     bool readyToMerge;
 
@@ -44,7 +43,7 @@ contract TokenMerge {
         readyToMerge = false;
     }
 
-    function loadToToken() public payable {
+    function loadToToken() public {
         require(msg.sender == sourceAddress, "TokenMerge::loadToToken: SENDER_NOT_SOURCE_ADDRESS");
 
         _safeTransferFrom(
@@ -58,7 +57,7 @@ contract TokenMerge {
     }
 
 
-    function tokenMerge(uint amountFromToken) public payable {
+    function tokenMerge(uint amountFromToken) public {
         // check readyToMerge
         require(
             readyToMerge,
@@ -67,7 +66,7 @@ contract TokenMerge {
 
         // check enough balance msg.sender
         require(
-            IERC20(fromToken).balanceOf(msg.sender) > amountFromToken,
+            IERC20(fromToken).balanceOf(msg.sender) >= amountFromToken,
             "TokenMerge::tokenMerge: NOT_ENOUGH_BALANCE"
         );
 
@@ -113,27 +112,6 @@ contract TokenMerge {
     ///////////
     // helpers ERC20 functions
     ///////////
-    /**
-     * @dev Approve ERC20
-     * @param token Token address
-     * @param to Recievers
-     * @param value Quantity of tokens to approve
-     */
-    function _safeApprove(
-        address token,
-        address to,
-        uint256 value
-    ) internal {
-        /* solhint-disable avoid-low-level-calls */
-        (bool success, bytes memory data) = token.call(
-            abi.encodeWithSelector(_APPROVE_SIGNATURE, to, value)
-        );
-        require(
-            success && (data.length == 0 || abi.decode(data, (bool))),
-            "Hermez::_safeApprove: ERC20_APPROVE_FAILED"
-        );
-    }
-
     /**
      * @dev Transfer tokens or ether from the smart contract
      * @param token Token address
