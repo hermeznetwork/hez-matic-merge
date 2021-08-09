@@ -1,24 +1,27 @@
 {
+  "name": "bridge_hermez",
   "scripts": {
-    "setup": "npm i",
-    "eslint": "npx eslint test/**",
-    "test": "npx hardhat test"
-  },
-  "dependencies": {
-    "@nomiclabs/hardhat-web3": "^2.0.0",
-    "@openzeppelin/contracts": "^3.1.0",
-    "@openzeppelin/test-helpers": "^0.5.6",
-    "dotenv": "^10.0.0",
-    "eslint": "^7.32.0",
-    "ffjavascript": "^0.2.38",
-    "hardhat": "^2.5.0",
-    "web3": "^1.5.1"
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test test/tokenMerge.test.js",
+    "deploy:tokenBridge:rinkeby": "npx hardhat run deployment/testnet/deployTokenBridgeTestnet.js --network rinkeby",
+    "verify:verifyTokenBridge:rinkeby": "npx hardhat run deployment/testnet/verifyTokenBridge.js --network rinkeby"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.3",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@openzeppelin/contracts": "^4.0.0",
+    "@openzeppelin/contracts-upgradeable": "^4.1.0",
+    "@openzeppelin/hardhat-upgrades": "^1.9.0",
     "chai": "^4.3.4",
-    "ethereum-waffle": "^3.4.0",
-    "ethers": "^5.4.4"
+    "dotenv": "^8.2.0",
+    "ethers": "^5.4.1",
+    "hardhat": "^2.4.1",
+    "solidity-coverage": "^0.7.16",
+    "ts-node": "^10.1.0"
+  },
+  "license": "GPL-3.0",
+  "dependencies": {
+    "@openzeppelin/test-helpers": "^0.5.12"
   }
 }

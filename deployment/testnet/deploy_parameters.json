@@ -1,0 +1,12 @@
+{
+  "tokenA": {
+    "name": "A_Token",
+    "symbol": "AT",
+    "initialAmount": 20000000
+  },
+  "tokenB": {
+    "name": "B_Token",
+    "symbol": "BT",
+    "initialAmount": 20000000
+  }
+}

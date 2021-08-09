@@ -1,0 +1,7 @@
+{
+ "tokenAAddress": "0x03701A40b32ED8F23635EDF48e4728e700Ea67cc",
+ "tokenBAddress": "0x3e8dCecc376ecbAfb0D2FC89E58e60D43E2a0328",
+ "governanceAddress": "0x3eA6A273fd66F1085C3B1ac0aD6a576D6E85352F",
+ "duration": 7776000,
+ "tokenBridge": "0x00772BCDA37B2709e6556521f9c4C6FC01908825"
+}
