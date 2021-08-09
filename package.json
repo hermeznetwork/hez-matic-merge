@@ -2,9 +2,10 @@
   "name": "bridge_hermez",
   "scripts": {
     "compile": "npx hardhat compile",
+    "setup": "npm i",
     "test": "npx hardhat test test/tokenMerge.test.js",
     "deploy:tokenBridge:rinkeby": "npx hardhat run deployment/testnet/deployTokenBridgeTestnet.js --network rinkeby",
-    "verify:verifyTokenBridge:rinkeby": "npx hardhat run deployment/testnet/verifyTokenBridge.js --network rinkeby"
+    "verify:tokenBridge:rinkeby": "npx hardhat run deployment/testnet/verifyTokenBridge.js --network rinkeby"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",

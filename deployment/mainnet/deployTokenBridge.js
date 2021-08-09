@@ -2,6 +2,7 @@ const { ethers, upgrades } = require("hardhat");
 
 async function main() {
     const deployer = (await ethers.getSigners())[0].address;
+
     /*
         Parameters
     */
@@ -9,6 +10,7 @@ async function main() {
     const tokenBAddress = "0xDa007777D86AC6d989cC9f79A73261b3fC5e0DA0"
     const governanceAddress = "0xDa007777D86AC6d989cC9f79A73261b3fC5e0DA0"
     const duration = 7776000;  // 90 days * 24 hours * 3600 seconds = 7776000
+    
     /*
         Deployment
     */

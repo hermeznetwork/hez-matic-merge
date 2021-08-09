@@ -12,7 +12,7 @@ describe("TokenBridge", function () {
       ];
     const iface = new ethers.utils.Interface(ABIbid);
 
-    const bridgeRatio = 3500;
+    const bridgeRatio = 3500; // 3.5 factor
     const duration = 3600; // 1 hour
 
     const tokenAName = "AToken";
@@ -23,8 +23,6 @@ describe("TokenBridge", function () {
     const tokenBSymbol = "BT";
     const tokenBInitialBalance = ethers.utils.parseEther("20000000");
 
-    let signers;
-
     let deployer;
     let governance;
     let userAWallet;
@@ -34,17 +32,20 @@ describe("TokenBridge", function () {
     let tokenAContract;
     let tokenBContract;
 
-    before("Deploy contract", async () => {
+    beforeEach("Deploy contract", async () => {
         // load signers
-        signers = await ethers.getSigners();
+        const signers = await ethers.getSigners();
 
         // assign signers
         deployer = signers[0];
         governance = signers[1];
-        userAWallet = new ethers.Wallet("0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a", ethers.provider);;
-        userBWallet = new ethers.Wallet("0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", ethers.provider);;
+
+        // use defualt hardhat private keys, for signing the permit signature
+        userAWallet = new ethers.Wallet("0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a", ethers.provider);
+        userBWallet = new ethers.Wallet("0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", ethers.provider);
+
         // deploy ERC20 tokens
-        const CustomERC20Factory = await ethers.getContractFactory("ERC20MockPermit");
+        const CustomERC20Factory = await ethers.getContractFactory("ERC20PermitMock");
 
         tokenAContract = await CustomERC20Factory.deploy(
             tokenAName,
@@ -84,64 +85,6 @@ describe("TokenBridge", function () {
         const deployedTimestamp = (await ethers.provider.getBlock(TokenBridgeContract.deployTransaction.blockNumber)).timestamp;
         expect(await TokenBridgeContract.withdrawTimeout()).to.be.equal(deployedTimestamp + duration);
     });
-    
-    // it("should not be able to bridge until TokenBridgeContract has tokens", async () => {
-    //     const amountToBridge = ethers.utils.parseEther("1");
-    //     expect(await 
-    //         TokenBridgeContractContract.bridge(amountToBridge)
-    //     ).to.be.revertedWith("TokenBridgeContractContract::TokenBridgeContractContract: NOT_READY_TO_MERGE");
-    // });
-
-    it("should be able to bridge tokens", async () => {
-        // send tokens to the TokenBridge contract
-        const tokenBridgeAmount = ethers.utils.parseEther("100")
-        await tokenBContract.connect(deployer).transfer(TokenBridgeContract.address, tokenBridgeAmount);
-        expect(await tokenBContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenBridgeAmount)
-
-        // send tokens to users A and B
-        const userAWalletmount = ethers.utils.parseEther("100")
-
-        await tokenAContract.connect(deployer).transfer(userAWallet.address, userAWalletmount);
-        await tokenAContract.connect(deployer).transfer(userBWallet.address, userAWalletmount);
-        expect(await tokenAContract.balanceOf(userAWallet.address)).to.be.equal(userAWalletmount);
-        expect(await tokenAContract.balanceOf(userBWallet.address)).to.be.equal(userAWalletmount);
-        expect(await tokenBContract.balanceOf(userAWallet.address)).to.be.equal(0);
-        expect(await tokenBContract.balanceOf(userBWallet.address)).to.be.equal(0);
-
-        // bridge 1 A token to 3.5 B tokens
-        const amountToBridge = ethers.utils.parseEther("1");
-        const deadline = ethers.constants.MaxUint256;
-        const value = amountToBridge;
-        const nonce = await tokenAContract.nonces(userAWallet.address);
-        const { v, r, s } = await createPermitSignature(
-          tokenAContract,
-          userAWallet,
-          TokenBridgeContract.address,
-          value,
-          nonce,
-          deadline
-        );
-  
-        const dataPermit = iface.encodeFunctionData("permit", [
-          userAWallet.address,
-          TokenBridgeContract.address,
-          value,
-          deadline,
-          v,
-          r,
-          s
-        ]);
-
-        await TokenBridgeContract.connect(userAWallet).bridge(amountToBridge, dataPermit)
-
-        const amountBridged = amountToBridge.mul(bridgeRatio).div(1000);
-        // check balances
-        expect(await tokenAContract.balanceOf(userAWallet.address)).to.be.equal(userAWalletmount.sub(amountToBridge));
-        expect(await tokenAContract.balanceOf(TokenBridgeContract.address)).to.be.equal(0);
-        expect(await tokenBContract.balanceOf(userAWallet.address)).to.be.equal(amountBridged);
-        expect(await tokenBContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenBridgeAmount.sub(amountBridged));
-        expect(amountBridged).to.be.equal(ethers.utils.parseEther("3.5"));
-    });
 
     // it("TokenBridgeContract: error balance & succesful user A", async () => {
     //     const baltokenAA = await tokenAContract.balanceOf(userAWallet.address);
@@ -168,31 +111,109 @@ describe("TokenBridge", function () {
     //     expect(Scalar.eq(expectedBaltokenB, newBaltokenBA)).to.be.equal(true);
     // });
 
-    // it("getLeftOver: error sender & error timeout", async () => {
-    //     expect(await 
-    //         TokenBridgeContract.connect(userAWallet).getLeftOver()
-    //     ).to.be.revertedWith("TokenBridgeContract::loadtokenB: SENDER_NOT_SOURCE_ADDRESS");
+    it("should be able to bridge tokens A for tokens B", async () => {
+        // Distribute tokens
+        const tokenBridgeAmount = ethers.utils.parseEther("100")
+        const userAWalletmount = ethers.utils.parseEther("10")
 
-    //     expect(await 
-    //         TokenBridgeContract.connect(governance).getLeftOver()
-    //     ).to.be.revertedWith("TokenBridgeContract::getLeftOver: NOT_AVAILABLE_YET");
-    // });
+        await tokenBContract.connect(deployer).transfer(TokenBridgeContract.address, tokenBridgeAmount);
+        await tokenAContract.connect(deployer).transfer(userAWallet.address, userAWalletmount);
+        await tokenAContract.connect(deployer).transfer(userBWallet.address, userAWalletmount);
 
-    // it("getLeftOver: succesful call", async () => {
-    //     // advance blocks
-    //     const timeoutBlocks = await TokenBridgeContract.timeout();
-    //     await time.advanceBlockTo(timeoutBlocks.toNumber() + 1);
+        // Assert token amounts
+        expect(await tokenBContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenBridgeAmount)
+        expect(await tokenAContract.balanceOf(userAWallet.address)).to.be.equal(userAWalletmount);
+        expect(await tokenAContract.balanceOf(userBWallet.address)).to.be.equal(userAWalletmount);
+        expect(await tokenBContract.balanceOf(userAWallet.address)).to.be.equal(0);
+        expect(await tokenBContract.balanceOf(userBWallet.address)).to.be.equal(0);
 
-    //     const balanceContract = await tokenBContract.balanceOf(TokenBridgeContract.address);
-    //     const balanceSource = await tokenBContract.balanceOf(governance.address);
+        // bridge 1 A token for 3.5 B tokens
+        const amountToBridgeInt = 1;
+        const amountBridgedInt = amountToBridgeInt * bridgeRatio / 1000;
+        const amountToBridge = ethers.utils.parseEther(amountToBridgeInt.toString());
 
-    //     await TokenBridgeContract.connect(governance).getLeftOver();
+        const deadline = ethers.constants.MaxUint256;
+        const value = amountToBridge;
+        const nonce = await tokenAContract.nonces(userAWallet.address);
+        const { v, r, s } = await createPermitSignature(
+          tokenAContract,
+          userAWallet,
+          TokenBridgeContract.address,
+          value,
+          nonce,
+          deadline
+        );
+  
+        const dataPermit = iface.encodeFunctionData("permit", [
+          userAWallet.address,
+          TokenBridgeContract.address,
+          value,
+          deadline,
+          v,
+          r,
+          s
+        ]);
 
-    //     const newBalanceContract = await tokenBContract.balanceOf(TokenBridgeContract.address);
-    //     const newBalanceSource = await tokenBContract.balanceOf(governance.address);
+        await TokenBridgeContract.connect(userAWallet).bridge(amountToBridge, dataPermit)
+        const amountBridged = amountToBridge.mul(bridgeRatio).div(1000);
 
-    //     expect(Scalar.eq(newBalanceContract, 0)).to.be.equal(true);
-    //     expect(Scalar.eq(newBalanceSource, Scalar.add(balanceContract, balanceSource)))
-    //         .to.be.equal(true);
-    // });
+        // check balances
+        expect(await tokenAContract.balanceOf(userAWallet.address)).to.be.equal(userAWalletmount.sub(amountToBridge));
+        expect(await tokenAContract.balanceOf(TokenBridgeContract.address)).to.be.equal(0);
+        expect(await tokenBContract.balanceOf(userAWallet.address)).to.be.equal(amountBridged);
+        expect(await tokenBContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenBridgeAmount.sub(amountBridged));
+        expect(amountBridged).to.be.equal(ethers.utils.parseEther(amountBridgedInt.toString()));
+    });
+
+    it("shouldn't be able to withdrawLeftOver if is not the owner, or the timeout is not reached", async () => {
+      await expect(
+        TokenBridgeContract.connect(userAWallet).withdrawLeftOver()
+      ).to.be.revertedWith("Ownable: caller is not the owner");
+
+      await expect(
+        TokenBridgeContract.connect(deployer).withdrawLeftOver()
+      ).to.be.revertedWith("TokenBridge::withdrawLeftOver: TIMEOUT_NOT_REACHED");
+       
+    });
+
+    it("should be able to withdrawLeftOver ", async () => {
+        // Send tokens to tokenBridge contract
+        await tokenBContract.connect(deployer).transfer(TokenBridgeContract.address, tokenBInitialBalance);
+        await tokenAContract.connect(deployer).transfer(TokenBridgeContract.address, tokenAInitialBalance);
+
+        // assert balances tokenBridge
+        expect(await tokenBContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenBInitialBalance);
+        expect(await tokenAContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenAInitialBalance);       
+        
+        // assert balances deployer
+        expect(await tokenAContract.balanceOf(deployer.address)).to.be.equal(0);
+        expect(await tokenBContract.balanceOf(deployer.address)).to.be.equal(0);
+
+        // assert withdraw can't be done until timeout is reached
+        const withdrawTimeout = (await TokenBridgeContract.withdrawTimeout()).toNumber();
+        let currentTimestamp = (await ethers.provider.getBlock()).timestamp
+
+        expect(withdrawTimeout).to.be.greaterThan(currentTimestamp)
+
+        await expect(
+          TokenBridgeContract.connect(deployer).withdrawLeftOver()
+        ).to.be.revertedWith("TokenBridge::withdrawLeftOver: TIMEOUT_NOT_REACHED");
+
+        // advance time and withdraw leftovers
+        await ethers.provider.send("evm_increaseTime", [withdrawTimeout - currentTimestamp + 1])
+        await ethers.provider.send("evm_mine")
+
+        currentTimestamp = (await ethers.provider.getBlock()).timestamp
+        expect(withdrawTimeout).to.be.lessThan(currentTimestamp)
+
+        await TokenBridgeContract.connect(deployer).withdrawLeftOver();
+
+        // assert balances tokenBridge
+        expect(await tokenBContract.balanceOf(TokenBridgeContract.address)).to.be.equal(0);
+        expect(await tokenAContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenAInitialBalance);       
+        
+        // assert balances deployer
+        expect(await tokenAContract.balanceOf(deployer.address)).to.be.equal(0);
+        expect(await tokenBContract.balanceOf(deployer.address)).to.be.equal(tokenBInitialBalance);
+    });
 });

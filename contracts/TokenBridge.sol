@@ -2,13 +2,9 @@
 
 pragma solidity 0.8.6;
 
-// import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-// import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-
 
 contract TokenBridge is Ownable {
     using SafeERC20 for IERC20; 
@@ -32,7 +28,7 @@ contract TokenBridge is Ownable {
     uint256 public withdrawTimeout;
 
     /**
-     * @dev Emitted when someone bridges theis tokens
+     * @dev Emitted when someone bridges their tokens
      */
     event Bridge(address indexed grantee, uint256 amount);
 
@@ -69,7 +65,7 @@ contract TokenBridge is Ownable {
 
     /**
      * @notice Method that allows bridge from tokens A to B at the ratio of 1 A --> 3.5 B
-     * @param amount amount of A tokens tokens to bridge
+     * @param amount Amount of A tokens tokens to bridge
      */
     function bridge(uint256 amount, bytes calldata _permitData) public {
         // recieve and burn A tokens     
@@ -82,11 +78,12 @@ contract TokenBridge is Ownable {
 
         // transfer B tokens
         tokenB.safeTransfer(msg.sender, (amount * BRIDGE_RATIO) / 1000);
+        
         emit Bridge(msg.sender, amount);
     }
 
     /**
-     * @notice Method that allows the owner to withdraw the remaining B tokens tokens
+     * @notice Method that allows the owner to withdraw the remaining B tokens
      */
     function withdrawLeftOver() public onlyOwner {
         require(
@@ -95,6 +92,7 @@ contract TokenBridge is Ownable {
         );
         uint256 currentBalance = tokenB.balanceOf(address(this));
         tokenB.safeTransfer(owner(), currentBalance);
+
         emit WithdrawLeftOver(currentBalance);
     }
 
@@ -107,12 +105,13 @@ contract TokenBridge is Ownable {
              "TokenBridge::extentWithdawTimeout: ONLY_GOVERNANCE_ALLOWED"
         );
         withdrawTimeout = withdrawTimeout + duration; 
+        
         emit TimeoutIncreased(withdrawTimeout);
     }
 
     /**
      * @notice Function to extract the selector of a bytes calldata
-     * @param _data the calldata bytes
+     * @param _data The calldata bytes
      */
     function getSelector(bytes memory _data) private pure returns (bytes4 sig) {
         assembly {

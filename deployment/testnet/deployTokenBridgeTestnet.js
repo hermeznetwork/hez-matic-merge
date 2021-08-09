@@ -3,22 +3,29 @@ const path = require("path");
 const fs = require("fs");
 const pathOutputJson = path.join(__dirname, "./deploy_output.json");
 
+const pathDeployParameters = path.join(__dirname, "./deploy_parameters.json");
+const deployParameters = require(pathDeployParameters);
+
 async function main() {
     const deployer = (await ethers.getSigners())[0].address;
+
     /*
         Parameters Tokens
     */
-    const tokenAName = "A_Token";
-    const tokenASymbol = "AT";
-    const tokenAInitialBalance = ethers.utils.parseEther("20000000");
+    const tokenA = deployParameters.tokenA
+    const tokenAName = tokenA.name;
+    const tokenASymbol = tokenA.symbol;
+    const tokenAInitialBalance = ethers.utils.parseEther(tokenA.initialAmount.toString());
 
-    const tokenBName = "B_Token";
-    const tokenBSymbol = "BT";
-    const tokenBInitialBalance = ethers.utils.parseEther("20000000");
+    const tokenB = deployParameters.tokenB
+    const tokenBName = tokenB.name;
+    const tokenBSymbol = tokenB.symbol;
+    const tokenBInitialBalance = ethers.utils.parseEther(tokenB.initialAmount.toString());
+
     /*
         Deployment Tokens
     */
-   const CustomERC20Factory = await ethers.getContractFactory("ERC20MockPermit");
+   const CustomERC20Factory = await ethers.getContractFactory("ERC20PermitMock");
 
    tokenAContract = await CustomERC20Factory.deploy(
        tokenAName,
@@ -33,6 +40,7 @@ async function main() {
        deployer,
        tokenBInitialBalance
    );
+   
     /*
         Parameters Bridge
     */

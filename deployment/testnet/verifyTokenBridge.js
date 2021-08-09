@@ -12,7 +12,7 @@ const deployParameters = require(pathDeployParameters);
 
 async function main() {    
 
-  // load Mnemonic accounts
+  // load deployer account
   const signersArray = await ethers.getSigners();
   const deployer = signersArray[0];
   const deployerAddress = await deployer.getAddress();
@@ -56,6 +56,7 @@ async function main() {
   } catch (error) {
     expect(error.message).to.be.equal("Contract source code already verified");
   }
+
   // verify tokenB
   const tokenB = deployParameters.tokenB;
   try {
