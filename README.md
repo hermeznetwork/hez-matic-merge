@@ -4,6 +4,11 @@ Smart contract implementation to merge two tokens
 
 [![Main CI](https://github.com/hermeznetwork/token-merge/actions/workflows/main.yml/badge.svg)](https://github.com/hermeznetwork/token-merge/actions/workflows/main.yml)
 
+## Requirements
+
+- node version: 14.x
+- npm version: 7.x
+
 ## Install
 
 ```
