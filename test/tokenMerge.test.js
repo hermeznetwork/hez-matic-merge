@@ -1,6 +1,5 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { time } = require("@openzeppelin/test-helpers");
 
 const {
     createPermitSignature
@@ -39,10 +38,8 @@ describe("TokenBridge", function () {
         // assign signers
         deployer = signers[0];
         governance = signers[1];
-
-        // use defualt hardhat private keys, for signing the permit signature
-        userAWallet = new ethers.Wallet("0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a", ethers.provider);
-        userBWallet = new ethers.Wallet("0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", ethers.provider);
+        userAWallet = signers[2];
+        userBWallet = signers[3];
 
         // deploy ERC20 tokens
         const CustomERC20Factory = await ethers.getContractFactory("ERC20PermitMock");
@@ -216,4 +213,15 @@ describe("TokenBridge", function () {
         expect(await tokenAContract.balanceOf(deployer.address)).to.be.equal(0);
         expect(await tokenBContract.balanceOf(deployer.address)).to.be.equal(tokenBInitialBalance);
     });
+
+  //   it("should be able to update withdrawLeftOver ", async () => {
+  //     // assert withdraw can't be done until timeout is reached
+  //     const withdrawTimeout = (await TokenBridgeContract.withdrawTimeout()).toNumber();
+  //     let currentTimestamp = (await ethers.provider.getBlock()).timestamp
+
+  //     // advance time and withdraw leftovers
+  //     await ethers.provider.send("evm_increaseTime", [withdrawTimeout - currentTimestamp + 1])
+  //     await ethers.provider.send("evm_mine")
+
+  // });
 });

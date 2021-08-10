@@ -78,7 +78,7 @@ contract TokenBridge is Ownable {
 
         // transfer B tokens
         tokenB.safeTransfer(msg.sender, (amount * BRIDGE_RATIO) / 1000);
-        
+
         emit Bridge(msg.sender, amount);
     }
 
@@ -99,14 +99,19 @@ contract TokenBridge is Ownable {
     /**
      * @notice Method that allows the governance to increase the withdraw timeout
      */
-    function increaseWithdrawTimeout(uint256 duration) public {
+    function setWithdrawTimeout(uint256 newWithdrawTimeout) public {
         require(
             msg.sender == governance,
-             "TokenBridge::extentWithdawTimeout: ONLY_GOVERNANCE_ALLOWED"
+             "TokenBridge::setWithdrawTimeout: ONLY_GOVERNANCE_ALLOWED"
         );
-        withdrawTimeout = withdrawTimeout + duration; 
+        require(
+            newWithdrawTimeout > withdrawTimeout,
+             "TokenBridge::setWithdrawTimeout: NEW_TIMEOUT_MUST_BE_HIGHER"
+        );
         
-        emit TimeoutIncreased(withdrawTimeout);
+        withdrawTimeout = newWithdrawTimeout; 
+        
+        emit TimeoutIncreased(newWithdrawTimeout);
     }
 
     /**

@@ -1,71 +1,50 @@
 const {
   ethers
 } = require("hardhat");
+const { expect } = require("chai");
 
-const PERMIT_TYPEHASH = ethers.utils.keccak256(ethers.utils.toUtf8Bytes("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"));
-async function createPermitDigest(token, owner, spender, value, nonce, deadline) {
-  const chainId = (await token.getChainId());
-  const name = await token.name();
-  let _domainSeparator = ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      ["bytes32", "bytes32", "bytes32", "uint256", "address"],
-      [
-        ethers.utils.keccak256(
-          ethers.utils.toUtf8Bytes(
-            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-          )
-        ),
-        ethers.utils.keccak256(ethers.utils.toUtf8Bytes(name)),
-        ethers.utils.keccak256(ethers.utils.toUtf8Bytes("1")),
-        chainId,
-        token.address,
-      ]
-    )
-  );
+async function createPermitSignature(tokenContractInstance, wallet, spenderAddress, value, nonce, deadline) {
 
-  return ethers.utils.solidityKeccak256(
-    ["bytes1", "bytes1", "bytes32", "bytes32"],
-    [
-      "0x19",
-      "0x01",
-      _domainSeparator,
-      ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(
-        ["bytes32", "address", "address", "uint256", "uint256", "uint256"],
-        [PERMIT_TYPEHASH, owner, spender, value, nonce, deadline]
-      ))
-    ]);
-}
+  const chainId = (await tokenContractInstance.getChainId());
+  const name = await tokenContractInstance.name();
 
-async function createPermitSignature(hardhatToken, wallet, spenderAddress, value, nonce, deadline) {
-  const digest = await createPermitDigest(
-    hardhatToken,
-    await wallet.getAddress(),
-    spenderAddress,
-    value,
-    nonce,
-    deadline
-  );
-
-  // must be a wallet not a signer!
-  const ownerPrivateKey = wallet.privateKey;
-  let signingKey = new ethers.utils.SigningKey(ownerPrivateKey);
-
-  let {
-    v,
-    r,
-    s
-  } = signingKey.signDigest(digest);
-
-  return {
-    v,
-    r,
-    s,
+  // The domain
+  const domain = {
+    name: name,
+    version: '1',
+    chainId: chainId,
+    verifyingContract: tokenContractInstance.address
   };
+
+  // The named list of all type definitions
+  const types = {
+    Permit: [
+      { name: 'owner', type: 'address' },
+      { name: 'spender', type: 'address' },
+      { name: 'value', type: 'uint256' },
+      { name: 'nonce', type: 'uint256' },
+      { name: 'deadline', type: 'uint256' },
+    ]
+  };
+
+  // The data to sign
+  const values = {
+    owner: wallet.address,
+    spender: spenderAddress,
+    value: value,
+    nonce: nonce,
+    deadline: deadline,
+  };
+
+  const rawSignature = await wallet._signTypedData(domain, types, values);
+  const signature = ethers.utils.splitSignature(rawSignature)
+  const recoveredAddressTyped = ethers.utils.verifyTypedData(domain, types, values, rawSignature);
+  expect(recoveredAddressTyped).to.be.equal(wallet.address)
+
+  return signature
 }
 
 
 module.exports = {
-  createPermitDigest,
-  PERMIT_TYPEHASH,
   createPermitSignature
 };
