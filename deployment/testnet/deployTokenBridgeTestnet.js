@@ -17,10 +17,10 @@ async function main() {
     const tokenASymbol = tokenA.symbol;
     const tokenAInitialBalance = ethers.utils.parseEther(tokenA.initialAmount.toString());
 
-    const tokenB = deployParameters.tokenB
-    const tokenBName = tokenB.name;
-    const tokenBSymbol = tokenB.symbol;
-    const tokenBInitialBalance = ethers.utils.parseEther(tokenB.initialAmount.toString());
+    const manoloToken = deployParameters.manoloToken
+    const manoloTokenName = manoloToken.name;
+    const manoloTokenSymbol = manoloToken.symbol;
+    const manoloTokenInitialBalance = ethers.utils.parseEther(manoloToken.initialAmount.toString());
 
     /*
         Deployment Tokens
@@ -34,18 +34,18 @@ async function main() {
         tokenAInitialBalance
     );
 
-    tokenBContract = await CustomERC20Factory.deploy(
-        tokenBName,
-        tokenBSymbol,
+    manoloTokenContract = await CustomERC20Factory.deploy(
+        manoloTokenName,
+        manoloTokenSymbol,
         deployer,
-        tokenBInitialBalance
+        manoloTokenInitialBalance
     );
 
     /*
         Parameters Bridge
     */
     const tokenAAddress = tokenAContract.address;
-    const tokenBAddress = tokenBContract.address;
+    const manoloTokenAddress = manoloTokenContract.address;
     const governanceAddress = deployer;
     const duration = 7776000;  // 90 days * 24 hours * 3600 seconds = 7776000
 
@@ -54,12 +54,12 @@ async function main() {
     console.log("#######################");
     console.log("deployer:", deployer)
     console.log("tokenAAddress:", tokenAAddress)
-    console.log("tokenBAddress:", tokenBAddress)
+    console.log("manoloTokenAddress:", manoloTokenAddress)
     console.log("governanceAddress:", governanceAddress)
     console.log("duration:", duration)
 
     const TokenBridgeFactory = await ethers.getContractFactory("TokenBridge");
-    const TokenBridge = await TokenBridgeFactory.deploy(tokenAAddress, tokenBAddress, governanceAddress, duration);
+    const TokenBridge = await TokenBridgeFactory.deploy(tokenAAddress, manoloTokenAddress, governanceAddress, duration);
     await TokenBridge.deployed();
 
     console.log("#######################\n");
@@ -70,23 +70,23 @@ async function main() {
     console.log("#######################");
 
     console.log("tokenAAddress:", await TokenBridge.tokenA());
-    console.log("tokenBAddress:", await TokenBridge.tokenB());
+    console.log("manoloTokenAddress:", await TokenBridge.manoloToken());
     console.log("governanceAddress:", await TokenBridge.governance());
-    console.log("BRIDGE_RATIO:", await TokenBridge.BRIDGE_RATIO());
-    console.log("withdrawTimeout:", await TokenBridge.withdrawTimeout());
+    console.log("BRIDGE_RATIO:", (await TokenBridge.BRIDGE_RATIO()).toNumber());
+    console.log("withdrawTimeout:", (await TokenBridge.withdrawTimeout()).toNumber());
     console.log("current timestamp:", (await ethers.provider.getBlock()).timestamp);
 
     console.log("\n#######################");
-    console.log("#####   Send B tokens to  TokenBridge #####");
+    console.log("#####   Send manolo tokens to  TokenBridge #####");
     console.log("#######################");
 
-    const txTransferTokens = await tokenBContract.transfer(TokenBridge.address, tokenBInitialBalance);
+    const txTransferTokens = await manoloTokenContract.transfer(TokenBridge.address, manoloTokenInitialBalance);
     await txTransferTokens.wait();
-    console.log("token Bridge has B tokens:", ethers.utils.formatEther(await tokenBContract.balanceOf(TokenBridge.address)));
+    console.log("manolo balance of TokenBridge contract: ", ethers.utils.formatEther(await manoloTokenContract.balanceOf(TokenBridge.address)));
 
     const outputJson = {
         tokenAAddress: tokenAAddress,
-        tokenBAddress: tokenBAddress,
+        manoloTokenAddress: manoloTokenAddress,
         governanceAddress: deployer,
         duration: duration,
         tokenBridge: TokenBridge.address

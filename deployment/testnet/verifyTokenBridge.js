@@ -28,7 +28,7 @@ async function main() {
         address: deployOutputParameters.tokenBridge,
         constructorArguments: [
           deployOutputParameters.tokenAAddress,
-          deployOutputParameters.tokenBAddress,
+          deployOutputParameters.manoloTokenAddress,
           deployOutputParameters.governanceAddress,
           deployOutputParameters.duration,
         ]
@@ -57,18 +57,18 @@ async function main() {
     expect(error.message).to.be.equal("Contract source code already verified");
   }
 
-  // verify tokenB
-  const tokenB = deployParameters.tokenB;
+  // verify manoloToken
+  const manoloToken = deployParameters.manoloToken;
   try {
     // verify governance
     await hre.run("verify:verify",
       {
-        address: deployOutputParameters.tokenBAddress,
+        address: deployOutputParameters.manoloTokenAddress,
         constructorArguments: [
-          tokenB.name,
-          tokenB.symbol,
-          tokenB.initialAccount || deployerAddress,
-          ethers.utils.parseEther(tokenB.initialAmount.toString()),
+          manoloToken.name,
+          manoloToken.symbol,
+          manoloToken.initialAccount || deployerAddress,
+          ethers.utils.parseEther(manoloToken.initialAmount.toString()),
         ]
       }
     );

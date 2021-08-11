@@ -18,9 +18,9 @@ describe("TokenBridge", function () {
   const tokenASymbol = "AT";
   const tokenAInitialBalance = ethers.utils.parseEther("20000000");
 
-  const tokenBName = "BToken";
-  const tokenBSymbol = "BT";
-  const tokenBInitialBalance = ethers.utils.parseEther("20000000");
+  const manoloTokenName = "Manolo";
+  const manoloTokenSymbol = "MAN";
+  const manoloTokenInitialBalance = ethers.utils.parseEther("20000000");
 
   let deployer;
   let governance;
@@ -29,7 +29,7 @@ describe("TokenBridge", function () {
 
   let TokenBridgeContract;
   let tokenAContract;
-  let tokenBContract;
+  let manoloTokenContract;
 
   beforeEach("Deploy contract", async () => {
     // load signers
@@ -51,21 +51,21 @@ describe("TokenBridge", function () {
       tokenAInitialBalance
     );
 
-    tokenBContract = await CustomERC20Factory.deploy(
-      tokenBName,
-      tokenBSymbol,
+    manoloTokenContract = await CustomERC20Factory.deploy(
+      manoloTokenName,
+      manoloTokenSymbol,
       deployer.address,
-      tokenBInitialBalance
+      manoloTokenInitialBalance
     );
 
     await tokenAContract.deployed();
-    await tokenBContract.deployed();
+    await manoloTokenContract.deployed();
 
     // deploy TokenBridgeContract
     const TokenBridgeFactory = await ethers.getContractFactory("TokenBridge");
     TokenBridgeContract = await TokenBridgeFactory.deploy(
       tokenAContract.address,
-      tokenBContract.address,
+      manoloTokenContract.address,
       governance.address,
       duration
     );
@@ -75,7 +75,7 @@ describe("TokenBridge", function () {
 
   it("should check the constructor", async () => {
     expect(await TokenBridgeContract.tokenA()).to.be.equal(tokenAContract.address);
-    expect(await TokenBridgeContract.tokenB()).to.be.equal(tokenBContract.address);
+    expect(await TokenBridgeContract.manoloToken()).to.be.equal(manoloTokenContract.address);
     expect(await TokenBridgeContract.governance()).to.be.equal(governance.address);
     expect(await TokenBridgeContract.BRIDGE_RATIO()).to.be.equal(bridgeRatio);
 
@@ -83,23 +83,23 @@ describe("TokenBridge", function () {
     expect(await TokenBridgeContract.withdrawTimeout()).to.be.equal(deployedTimestamp + duration);
   });
 
-  it("souldn0t be able to bridge tokens A for tokens B", async () => {
+  it("shouldn't be able to bridge tokens A for tokens B", async () => {
     // distribute tokens
     const tokenBridgeAmount = ethers.utils.parseEther("100")
     const userAWalletmount = ethers.utils.parseEther("1")
 
-    await tokenBContract.connect(deployer).transfer(TokenBridgeContract.address, tokenBridgeAmount);
+    await manoloTokenContract.connect(deployer).transfer(TokenBridgeContract.address, tokenBridgeAmount);
     await tokenAContract.connect(deployer).transfer(userAWallet.address, userAWalletmount);
     await tokenAContract.connect(deployer).transfer(userBWallet.address, userAWalletmount);
 
     // assert token amounts
-    expect(await tokenBContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenBridgeAmount)
+    expect(await manoloTokenContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenBridgeAmount)
     expect(await tokenAContract.balanceOf(userAWallet.address)).to.be.equal(userAWalletmount);
     expect(await tokenAContract.balanceOf(userBWallet.address)).to.be.equal(userAWalletmount);
-    expect(await tokenBContract.balanceOf(userAWallet.address)).to.be.equal(0);
-    expect(await tokenBContract.balanceOf(userBWallet.address)).to.be.equal(0);
+    expect(await manoloTokenContract.balanceOf(userAWallet.address)).to.be.equal(0);
+    expect(await manoloTokenContract.balanceOf(userBWallet.address)).to.be.equal(0);
 
-    // bridge 1 A token for 3.5 B tokens
+    // bridge 1 A token for 3.5 manolo tokens
     const amountToBridgeInt = 10;
     const amountBridgedInt = amountToBridgeInt * bridgeRatio / 1000;
     const amountToBridge = ethers.utils.parseEther(amountToBridgeInt.toString());
@@ -135,18 +135,18 @@ describe("TokenBridge", function () {
     const tokenBridgeAmount = ethers.utils.parseEther("100")
     const userAWalletmount = ethers.utils.parseEther("10")
 
-    await tokenBContract.connect(deployer).transfer(TokenBridgeContract.address, tokenBridgeAmount);
+    await manoloTokenContract.connect(deployer).transfer(TokenBridgeContract.address, tokenBridgeAmount);
     await tokenAContract.connect(deployer).transfer(userAWallet.address, userAWalletmount);
     await tokenAContract.connect(deployer).transfer(userBWallet.address, userAWalletmount);
 
     // assert token amounts
-    expect(await tokenBContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenBridgeAmount)
+    expect(await manoloTokenContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenBridgeAmount)
     expect(await tokenAContract.balanceOf(userAWallet.address)).to.be.equal(userAWalletmount);
     expect(await tokenAContract.balanceOf(userBWallet.address)).to.be.equal(userAWalletmount);
-    expect(await tokenBContract.balanceOf(userAWallet.address)).to.be.equal(0);
-    expect(await tokenBContract.balanceOf(userBWallet.address)).to.be.equal(0);
+    expect(await manoloTokenContract.balanceOf(userAWallet.address)).to.be.equal(0);
+    expect(await manoloTokenContract.balanceOf(userBWallet.address)).to.be.equal(0);
 
-    // bridge 1 A token for 3.5 B tokens
+    // bridge 1 A token for 3.5 manolo tokens
     const amountToBridgeInt = 1;
     const amountBridgedInt = amountToBridgeInt * bridgeRatio / 1000;
     const amountToBridge = ethers.utils.parseEther(amountToBridgeInt.toString());
@@ -204,12 +204,12 @@ describe("TokenBridge", function () {
     expect(burnEvent.args.to).to.be.equal("0x0000000000000000000000000000000000000000");
     expect(burnEvent.args.value).to.be.equal(amountToBridge);
 
-    // transfer token B Event
-    const transferTokenBEvent = tokenBContract.interface.parseLog(receiptBridge.events[4])
-    expect(transferTokenBEvent.name).to.be.equal("Transfer");
-    expect(transferTokenBEvent.args.from).to.be.equal(TokenBridgeContract.address);
-    expect(transferTokenBEvent.args.to).to.be.equal(userAWallet.address);
-    expect(transferTokenBEvent.args.value).to.be.equal(amountBridged);
+    // transfer manolo token Event
+    const transfermanoloTokenEvent = manoloTokenContract.interface.parseLog(receiptBridge.events[4])
+    expect(transfermanoloTokenEvent.name).to.be.equal("Transfer");
+    expect(transfermanoloTokenEvent.args.from).to.be.equal(TokenBridgeContract.address);
+    expect(transfermanoloTokenEvent.args.to).to.be.equal(userAWallet.address);
+    expect(transfermanoloTokenEvent.args.value).to.be.equal(amountBridged);
 
     // bridge event
     const granteeEvent = receiptBridge.events[5]
@@ -220,8 +220,8 @@ describe("TokenBridge", function () {
     // check balances
     expect(await tokenAContract.balanceOf(userAWallet.address)).to.be.equal(userAWalletmount.sub(amountToBridge));
     expect(await tokenAContract.balanceOf(TokenBridgeContract.address)).to.be.equal(0);
-    expect(await tokenBContract.balanceOf(userAWallet.address)).to.be.equal(amountBridged);
-    expect(await tokenBContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenBridgeAmount.sub(amountBridged));
+    expect(await manoloTokenContract.balanceOf(userAWallet.address)).to.be.equal(amountBridged);
+    expect(await manoloTokenContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenBridgeAmount.sub(amountBridged));
     expect(amountBridged).to.be.equal(ethers.utils.parseEther(amountBridgedInt.toString()));
   });
 
@@ -236,17 +236,17 @@ describe("TokenBridge", function () {
   });
 
   it("should be able to withdrawLeftOver ", async () => {
-    // send tokens to tokenBridge contract
-    await tokenBContract.connect(deployer).transfer(TokenBridgeContract.address, tokenBInitialBalance);
+    // send tokens to TokenBridge contract
+    await manoloTokenContract.connect(deployer).transfer(TokenBridgeContract.address, manoloTokenInitialBalance);
     await tokenAContract.connect(deployer).transfer(TokenBridgeContract.address, tokenAInitialBalance);
 
-    // assert balances tokenBridge
-    expect(await tokenBContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenBInitialBalance);
+    // assert balances TokenBridge
+    expect(await manoloTokenContract.balanceOf(TokenBridgeContract.address)).to.be.equal(manoloTokenInitialBalance);
     expect(await tokenAContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenAInitialBalance);
 
     // assert balances deployer
     expect(await tokenAContract.balanceOf(deployer.address)).to.be.equal(0);
-    expect(await tokenBContract.balanceOf(deployer.address)).to.be.equal(0);
+    expect(await manoloTokenContract.balanceOf(deployer.address)).to.be.equal(0);
 
     // assert withdraw can't be done until timeout is reached
     const withdrawTimeout = (await TokenBridgeContract.withdrawTimeout()).toNumber();
@@ -267,22 +267,22 @@ describe("TokenBridge", function () {
 
     await TokenBridgeContract.connect(deployer).withdrawLeftOver();
 
-    // assert balances tokenBridge
-    expect(await tokenBContract.balanceOf(TokenBridgeContract.address)).to.be.equal(0);
+    // assert balances TokenBridge
+    expect(await manoloTokenContract.balanceOf(TokenBridgeContract.address)).to.be.equal(0);
     expect(await tokenAContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenAInitialBalance);
 
     // assert balances deployer
     expect(await tokenAContract.balanceOf(deployer.address)).to.be.equal(0);
-    expect(await tokenBContract.balanceOf(deployer.address)).to.be.equal(tokenBInitialBalance);
+    expect(await manoloTokenContract.balanceOf(deployer.address)).to.be.equal(manoloTokenInitialBalance);
   });
 
   it("should be able to update withdrawLeftOver ", async () => {
-    // send tokens to tokenBridge contract
-    await tokenBContract.connect(deployer).transfer(TokenBridgeContract.address, tokenBInitialBalance);
+    // send tokens to TokenBridge contract
+    await manoloTokenContract.connect(deployer).transfer(TokenBridgeContract.address, manoloTokenInitialBalance);
 
     // assert balances
-    expect(await tokenBContract.balanceOf(TokenBridgeContract.address)).to.be.equal(tokenBInitialBalance);
-    expect(await tokenBContract.balanceOf(deployer.address)).to.be.equal(0);
+    expect(await manoloTokenContract.balanceOf(TokenBridgeContract.address)).to.be.equal(manoloTokenInitialBalance);
+    expect(await manoloTokenContract.balanceOf(deployer.address)).to.be.equal(0);
 
     // assert withdraw can't be done until timeout is reached
     const withdrawTimeout = (await TokenBridgeContract.withdrawTimeout()).toNumber();

@@ -12,14 +12,14 @@ contract TokenBridge is Ownable {
     // bytes4(keccak256(bytes("permit(address,address,uint256,uint256,uint8,bytes32,bytes32)")));
     bytes4 constant _PERMIT_SIGNATURE = 0xd505accf;
     
-    // Bridge ratio between tokenA and tokenB multiplied by 1000
+    // Bridge ratio between tokenA and manoloToken multiplied by 1000
     uint256 public constant BRIDGE_RATIO = 3500;
 
     // Token A address
     IERC20 public immutable tokenA; 
 
-    // Token B address
-    IERC20 public immutable tokenB;
+    // Manolo token address
+    IERC20 public immutable manoloToken;
     
     // Governance address
     address public governance;
@@ -43,28 +43,28 @@ contract TokenBridge is Ownable {
     event WithdrawLeftOver(uint256 amount);
 
     /**
-     * @dev This contract will recieve B token tokens, the users will be able to bridge their A tokens for B tokens
+     * @dev This contract will recieve manolo tokens, the users will be able to bridge the their A tokens for manolo tokens
      *      as long as this contract holds enough amount. A Tokens will be burned in this process.
      *      Once the withdrawTimeout is reached the owner will be able to withdraw the leftover tokens.
      * @param _tokenA Token A address
-     * @param _tokenB Token B address
+     * @param _manoloToken Manolo token address
      * @param _governance Governance address
      * @param duration Time in seconds that the owner will not be able to withdraw the tokens
      */
     constructor (
         IERC20 _tokenA,
-        IERC20 _tokenB,
+        IERC20 _manoloToken,
         address _governance,
         uint256 duration
     ){
         tokenA = _tokenA;
-        tokenB = _tokenB;
+        manoloToken = _manoloToken;
         governance = _governance;
         withdrawTimeout = block.timestamp + duration;
     }
 
     /**
-     * @notice Method that allows bridge from tokens A to B at the ratio of 1 A --> 3.5 B
+     * @notice Method that allows bridge from A tokens to manolo tokens at the ratio of 1 A --> 3.5 Manolos
      * @param amount Amount of A tokens tokens to bridge
      */
     function bridge(uint256 amount, bytes calldata _permitData) public {
@@ -76,22 +76,22 @@ contract TokenBridge is Ownable {
         tokenA.safeTransferFrom(msg.sender, address(this), amount);
         ERC20Burnable(address(tokenA)).burn(amount);
 
-        // transfer B tokens
-        tokenB.safeTransfer(msg.sender, (amount * BRIDGE_RATIO) / 1000);
+        // transfer manolo tokens
+        manoloToken.safeTransfer(msg.sender, (amount * BRIDGE_RATIO) / 1000);
 
         emit Bridge(msg.sender, amount);
     }
 
     /**
-     * @notice Method that allows the owner to withdraw the remaining B tokens
+     * @notice Method that allows the owner to withdraw the remaining manolo tokens
      */
     function withdrawLeftOver() public onlyOwner {
         require(
             block.timestamp > withdrawTimeout,
             "TokenBridge::withdrawLeftOver: TIMEOUT_NOT_REACHED"
         );
-        uint256 currentBalance = tokenB.balanceOf(address(this));
-        tokenB.safeTransfer(owner(), currentBalance);
+        uint256 currentBalance = manoloToken.balanceOf(address(this));
+        manoloToken.safeTransfer(owner(), currentBalance);
 
         emit WithdrawLeftOver(currentBalance);
     }

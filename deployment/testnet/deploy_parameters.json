@@ -4,9 +4,9 @@
     "symbol": "AT",
     "initialAmount": 20000000
   },
-  "tokenB": {
-    "name": "B_Token",
-    "symbol": "BT",
+  "manoloToken": {
+    "name": "Manolo",
+    "symbol": "MAN",
     "initialAmount": 20000000
   }
 }
