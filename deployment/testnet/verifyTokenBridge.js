@@ -1,7 +1,7 @@
 require("dotenv").config();
 const path = require("path");
 const hre = require("hardhat");
-const {expect} = require("chai");
+const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
 const pathDeployOutputParameters = path.join(__dirname, "./deploy_output.json");
@@ -10,7 +10,7 @@ const deployOutputParameters = require(pathDeployOutputParameters);
 const pathDeployParameters = path.join(__dirname, "./deploy_parameters.json");
 const deployParameters = require(pathDeployParameters);
 
-async function main() {    
+async function main() {
 
   // load deployer account
   const signersArray = await ethers.getSigners();
@@ -25,10 +25,10 @@ async function main() {
   try {
     await hre.run("verify:verify",
       {
-        address:deployOutputParameters.tokenBridge,
+        address: deployOutputParameters.tokenBridge,
         constructorArguments: [
           deployOutputParameters.tokenAAddress,
-          deployOutputParameters.tokenBAddress,  
+          deployOutputParameters.tokenBAddress,
           deployOutputParameters.governanceAddress,
           deployOutputParameters.duration,
         ]
@@ -44,10 +44,10 @@ async function main() {
     // verify governance
     await hre.run("verify:verify",
       {
-        address:deployOutputParameters.tokenAAddress,
+        address: deployOutputParameters.tokenAAddress,
         constructorArguments: [
           tokenA.name,
-          tokenA.symbol,  
+          tokenA.symbol,
           tokenA.initialAccount || deployerAddress,
           ethers.utils.parseEther(tokenA.initialAmount.toString()),
         ]
@@ -63,10 +63,10 @@ async function main() {
     // verify governance
     await hre.run("verify:verify",
       {
-        address:deployOutputParameters.tokenBAddress,
+        address: deployOutputParameters.tokenBAddress,
         constructorArguments: [
           tokenB.name,
-          tokenB.symbol,  
+          tokenB.symbol,
           tokenB.initialAccount || deployerAddress,
           ethers.utils.parseEther(tokenB.initialAmount.toString()),
         ]

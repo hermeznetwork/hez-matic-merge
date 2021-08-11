@@ -25,29 +25,29 @@ async function main() {
     /*
         Deployment Tokens
     */
-   const CustomERC20Factory = await ethers.getContractFactory("ERC20PermitMock");
+    const CustomERC20Factory = await ethers.getContractFactory("ERC20PermitMock");
 
-   tokenAContract = await CustomERC20Factory.deploy(
-       tokenAName,
-       tokenASymbol,
-       deployer,
-       tokenAInitialBalance
-   );
+    tokenAContract = await CustomERC20Factory.deploy(
+        tokenAName,
+        tokenASymbol,
+        deployer,
+        tokenAInitialBalance
+    );
 
-   tokenBContract = await CustomERC20Factory.deploy(
-       tokenBName,
-       tokenBSymbol,
-       deployer,
-       tokenBInitialBalance
-   );
-   
+    tokenBContract = await CustomERC20Factory.deploy(
+        tokenBName,
+        tokenBSymbol,
+        deployer,
+        tokenBInitialBalance
+    );
+
     /*
         Parameters Bridge
     */
-   const tokenAAddress = tokenAContract.address;
-   const tokenBAddress = tokenBContract.address;
-   const governanceAddress = deployer;
-   const duration = 7776000;  // 90 days * 24 hours * 3600 seconds = 7776000
+    const tokenAAddress = tokenAContract.address;
+    const tokenBAddress = tokenBContract.address;
+    const governanceAddress = deployer;
+    const duration = 7776000;  // 90 days * 24 hours * 3600 seconds = 7776000
 
     console.log("\n#######################");
     console.log("##### Deployment #####");
@@ -69,12 +69,12 @@ async function main() {
     console.log("#####    Checks    #####");
     console.log("#######################");
 
-    console.log("tokenAAddress:",  await TokenBridge.tokenA());
-    console.log("tokenBAddress:",  await TokenBridge.tokenB());
-    console.log("governanceAddress:",  await TokenBridge.governance());
-    console.log("BRIDGE_RATIO:",  await TokenBridge.BRIDGE_RATIO());
-    console.log("withdrawTimeout:",  await TokenBridge.withdrawTimeout());
-    console.log("current timestamp:",  (await ethers.provider.getBlock()).timestamp);
+    console.log("tokenAAddress:", await TokenBridge.tokenA());
+    console.log("tokenBAddress:", await TokenBridge.tokenB());
+    console.log("governanceAddress:", await TokenBridge.governance());
+    console.log("BRIDGE_RATIO:", await TokenBridge.BRIDGE_RATIO());
+    console.log("withdrawTimeout:", await TokenBridge.withdrawTimeout());
+    console.log("current timestamp:", (await ethers.provider.getBlock()).timestamp);
 
     console.log("\n#######################");
     console.log("#####   Send B tokens to  TokenBridge #####");
@@ -83,7 +83,7 @@ async function main() {
     const txTransferTokens = await tokenBContract.transfer(TokenBridge.address, tokenBInitialBalance);
     await txTransferTokens.wait();
     console.log("token Bridge has B tokens:", ethers.utils.formatEther(await tokenBContract.balanceOf(TokenBridge.address)));
-    
+
     const outputJson = {
         tokenAAddress: tokenAAddress,
         tokenBAddress: tokenBAddress,

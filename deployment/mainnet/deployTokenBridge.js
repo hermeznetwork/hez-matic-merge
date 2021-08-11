@@ -10,7 +10,7 @@ async function main() {
     const tokenBAddress = "0xDa007777D86AC6d989cC9f79A73261b3fC5e0DA0"
     const governanceAddress = "0xDa007777D86AC6d989cC9f79A73261b3fC5e0DA0"
     const duration = 7776000;  // 90 days * 24 hours * 3600 seconds = 7776000
-    
+
     /*
         Deployment
     */
@@ -34,13 +34,13 @@ async function main() {
     console.log("#####    Checks    #####");
     console.log("#######################");
 
-    console.log("tokenAAddress:",  await TokenBridge.tokenA());
-    console.log("tokenBAddress:",  await TokenBridge.tokenB());
-    console.log("governanceAddress:",  await TokenBridge.governance());
-    console.log("BRIDGE_RATIO:",  (await TokenBridge.BRIDGE_RATIO()).toNumber());
+    console.log("tokenAAddress:", await TokenBridge.tokenA());
+    console.log("tokenBAddress:", await TokenBridge.tokenB());
+    console.log("governanceAddress:", await TokenBridge.governance());
+    console.log("BRIDGE_RATIO:", (await TokenBridge.BRIDGE_RATIO()).toNumber());
 
-    console.log("withdrawTimeout:",  await TokenBridge.withdrawTimeout());
-    console.log("current timestamp:",  (await ethers.provider.getBlock()).timestamp);
+    console.log("withdrawTimeout:", await TokenBridge.withdrawTimeout());
+    console.log("current timestamp:", (await ethers.provider.getBlock()).timestamp);
 }
 
 main().catch(e => {

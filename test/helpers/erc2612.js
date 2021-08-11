@@ -4,7 +4,6 @@ const {
 const { expect } = require("chai");
 
 async function createPermitSignature(tokenContractInstance, wallet, spenderAddress, value, nonce, deadline) {
-
   const chainId = (await tokenContractInstance.getChainId());
   const name = await tokenContractInstance.name();
 
