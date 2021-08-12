@@ -109,3 +109,4 @@ cache
 build
 package-lock.json
 artifacts
+deploy_output.json

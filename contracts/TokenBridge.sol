@@ -24,7 +24,7 @@ contract TokenBridge is Ownable {
     // Governance address
     address public governance;
 
-    // UNIX time when the owner will be able to withdraw the rest of the tokens
+    // UNIX time in seconds when the owner will be able to withdraw the rest of the tokens
     uint256 public withdrawTimeout;
 
     /**
@@ -43,7 +43,7 @@ contract TokenBridge is Ownable {
     event WithdrawLeftOver(uint256 amount);
 
     /**
-     * @dev This contract will recieve manolo tokens, the users will be able to bridge the their A tokens for manolo tokens
+     * @dev This contract will receive manolo tokens, the users will be able to bridge the their A tokens for manolo tokens
      *      as long as this contract holds enough amount. A Tokens will be burned in this process.
      *      Once the withdrawTimeout is reached the owner will be able to withdraw the leftover tokens.
      * @param _tokenA Token A address
@@ -65,10 +65,12 @@ contract TokenBridge is Ownable {
 
     /**
      * @notice Method that allows bridge from A tokens to manolo tokens at the ratio of 1 A --> 3.5 Manolos
-     * @param amount Amount of A tokens tokens to bridge
+     * Users can either use the permit functionality, or approve previously the tokens and send an empty _permitData
+     * @param amount Amount of A tokens to bridge
+     * @param _permitData Raw data of the call `permit` of the token
      */
     function bridge(uint256 amount, bytes calldata _permitData) public {
-        // recieve and burn A tokens     
+        // receive and burn A tokens     
         if (_permitData.length != 0) {
             _permit(address(tokenA), amount, _permitData);
         }
@@ -98,6 +100,7 @@ contract TokenBridge is Ownable {
 
     /**
      * @notice Method that allows the governance to increase the withdraw timeout
+     * @param newWithdrawTimeout new withdraw timeout
      */
     function setWithdrawTimeout(uint256 newWithdrawTimeout) public {
         require(
