@@ -1,11 +1,14 @@
 {
-  "name": "bridge_hermez",
+  "name": "hez_matic_merge",
   "scripts": {
     "compile": "npx hardhat compile",
     "setup": "npm i",
-    "test": "npx hardhat test test/tokenMerge.test.js",
-    "deploy:tokenBridge:rinkeby": "npx hardhat run deployment/testnet/deployTokenBridgeTestnet.js --network rinkeby",
-    "verify:tokenBridge:rinkeby": "npx hardhat run deployment/testnet/verifyTokenBridge.js --network rinkeby"
+    "test": "npx hardhat test test/hezMaticMerge.test.js",
+    "deploy:HezMaticMergeTestnet:rinkeby": "npx hardhat run deployment/testnet/deployHezMaticMergeTestnet.js --network rinkeby",
+    "verify:HezMaticMergeTestnet:rinkeby": "npx hardhat run deployment/testnet/verifyHezMaticMerge.js --network rinkeby",
+    "deploy:HezMaticMergeTesnet:hardhat": "npx hardhat run deployment/testnet/deployHezMaticMergeTestnet.js --network hardhat",
+    "deploy:HezMaticMerge:hardhat": "npx hardhat run deployment/mainnet/deployHezMaticMerge.js --network hardhat",
+    "deploy:HezMaticMerge:mainnet": "npx hardhat run deployment/mainnet/deployHezMaticMerge.js --network mainnet"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",

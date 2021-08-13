@@ -6,96 +6,100 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
-contract TokenBridge is Ownable {
+contract HezMaticMerge is Ownable {
     using SafeERC20 for IERC20; 
 
     // bytes4(keccak256(bytes("permit(address,address,uint256,uint256,uint8,bytes32,bytes32)")));
     bytes4 constant _PERMIT_SIGNATURE = 0xd505accf;
     
-    // Bridge ratio between tokenA and manoloToken multiplied by 1000
-    uint256 public constant BRIDGE_RATIO = 3500;
+    // Swap ratio from HEZ to MATIC multiplied by 1000
+    uint256 public constant SWAP_RATIO = 3500;
 
-    // Token A address
-    IERC20 public immutable tokenA; 
+    // HEZ token address
+    IERC20 public immutable hez;
 
-    // Manolo token address
-    IERC20 public immutable manoloToken;
+    // MATIC token address
+    IERC20 public immutable matic;
     
     // Governance address
     address public governance;
 
-    // UNIX time in seconds when the owner will be able to withdraw the rest of the tokens
+    // UNIX time in seconds when the owner will be able to withdraw the remaining MATIC tokens
     uint256 public withdrawTimeout;
 
     /**
-     * @dev Emitted when someone bridges their tokens
+     * @dev Emitted when someone swap HEZ for MATIC
      */
-    event Bridge(address indexed grantee, uint256 amount);
+    event HezToMatic(uint256 hezAmount, uint256 maticAmount, address indexed grantee);
 
     /**
      * @dev Emitted when the governance increases the timeout
      */
-    event TimeoutIncreased(uint256 newWithdrawTimeout);
+    event NewWithdrawTimeout(uint256 newWithdrawTimeout);
 
     /**
-     * @dev Emitted when the owner withdraw the remaining tokens
+     * @dev Emitted when the owner withdraw tokens
      */
-    event WithdrawLeftOver(uint256 amount);
+    event WithdrawTokens(address tokenAddress, uint256 amount);
 
     /**
-     * @dev This contract will receive manolo tokens, the users will be able to bridge the their A tokens for manolo tokens
-     *      as long as this contract holds enough amount. A Tokens will be burned in this process.
-     *      Once the withdrawTimeout is reached the owner will be able to withdraw the leftover tokens.
-     * @param _tokenA Token A address
-     * @param _manoloToken Manolo token address
+     * @dev This contract will receive MATIC tokens, the users will be able to swap their HEZ tokens for MATIC tokens
+     *      as long as this contract holds enough amount. The swapped HEZ tokens will be burned.
+     *      Once the withdrawTimeout is reached, the owner will be able to withdraw the remaining MATIC tokens.
+     * @param _hez HEZ token address
+     * @param _matic MATIC token address
      * @param _governance Governance address
-     * @param duration Time in seconds that the owner will not be able to withdraw the tokens
+     * @param duration Time in seconds that the owner will not be able to withdraw the MATIC tokens
      */
     constructor (
-        IERC20 _tokenA,
-        IERC20 _manoloToken,
+        IERC20 _hez,
+        IERC20 _matic,
         address _governance,
         uint256 duration
     ){
-        tokenA = _tokenA;
-        manoloToken = _manoloToken;
+        hez = _hez;
+        matic = _matic;
         governance = _governance;
         withdrawTimeout = block.timestamp + duration;
     }
 
     /**
-     * @notice Method that allows bridge from A tokens to manolo tokens at the ratio of 1 A --> 3.5 Manolos
+     * @notice Method that allows swap HEZ for MATIC tokens at the ratio of 1 HEZ --> 3.5 MATIC
      * Users can either use the permit functionality, or approve previously the tokens and send an empty _permitData
-     * @param amount Amount of A tokens to bridge
+     * @param hezAmount Amount of HEZ to swap
      * @param _permitData Raw data of the call `permit` of the token
      */
-    function bridge(uint256 amount, bytes calldata _permitData) public {
-        // receive and burn A tokens     
+    function hezToMatic(uint256 hezAmount, bytes calldata _permitData) public {
+        // receive and burn HEZ tokens
         if (_permitData.length != 0) {
-            _permit(address(tokenA), amount, _permitData);
+            _permit(address(hez), hezAmount, _permitData);
         }
 
-        tokenA.safeTransferFrom(msg.sender, address(this), amount);
-        ERC20Burnable(address(tokenA)).burn(amount);
+        hez.safeTransferFrom(msg.sender, address(this), hezAmount);
+        ERC20Burnable(address(hez)).burn(hezAmount);
 
-        // transfer manolo tokens
-        manoloToken.safeTransfer(msg.sender, (amount * BRIDGE_RATIO) / 1000);
+        // transfer MATIC tokens
+        uint256 maticAmount = (hezAmount * SWAP_RATIO) / 1000;
+        matic.safeTransfer(msg.sender, maticAmount);
 
-        emit Bridge(msg.sender, amount);
+        emit HezToMatic(hezAmount, maticAmount, msg.sender);
     }
 
     /**
-     * @notice Method that allows the owner to withdraw the remaining manolo tokens
+     * @notice Method that allows the owner to withdraw any token from this contract
+     * In order to withdraw MATIC tokens the owner must wait until the withdrawTimeout expires
      */
-    function withdrawLeftOver() public onlyOwner {
-        require(
-            block.timestamp > withdrawTimeout,
-            "TokenBridge::withdrawLeftOver: TIMEOUT_NOT_REACHED"
-        );
-        uint256 currentBalance = manoloToken.balanceOf(address(this));
-        manoloToken.safeTransfer(owner(), currentBalance);
+    function withdrawTokens(address tokenAddress, uint256 amount) public onlyOwner {
+        if(tokenAddress == address(matic)) {
+            require(
+                block.timestamp > withdrawTimeout,
+                "HezMaticMerge::withdrawTokens: TIMEOUT_NOT_REACHED"
+            );
+        }
+        
+        IERC20(tokenAddress).safeTransfer(owner(), amount);
 
-        emit WithdrawLeftOver(currentBalance);
+        emit WithdrawTokens(tokenAddress, amount);
     }
 
     /**
@@ -105,23 +109,23 @@ contract TokenBridge is Ownable {
     function setWithdrawTimeout(uint256 newWithdrawTimeout) public {
         require(
             msg.sender == governance,
-             "TokenBridge::setWithdrawTimeout: ONLY_GOVERNANCE_ALLOWED"
+             "HezMaticMerge::setWithdrawTimeout: ONLY_GOVERNANCE_ALLOWED"
         );
         require(
             newWithdrawTimeout > withdrawTimeout,
-             "TokenBridge::setWithdrawTimeout: NEW_TIMEOUT_MUST_BE_HIGHER"
+             "HezMaticMerge::setWithdrawTimeout: NEW_TIMEOUT_MUST_BE_HIGHER"
         );
         
         withdrawTimeout = newWithdrawTimeout; 
         
-        emit TimeoutIncreased(newWithdrawTimeout);
+        emit NewWithdrawTimeout(newWithdrawTimeout);
     }
 
     /**
      * @notice Function to extract the selector of a bytes calldata
      * @param _data The calldata bytes
      */
-    function getSelector(bytes memory _data) private pure returns (bytes4 sig) {
+    function _getSelector(bytes memory _data) private pure returns (bytes4 sig) {
         assembly {
             sig := mload(add(_data, 32))
         }
@@ -138,10 +142,10 @@ contract TokenBridge is Ownable {
         uint256 _amount,
         bytes calldata _permitData
     ) internal {
-        bytes4 sig = getSelector(_permitData);
+        bytes4 sig = _getSelector(_permitData);
         require(
             sig == _PERMIT_SIGNATURE,
-            "TokenBridge::_permit: NOT_VALID_CALL"
+            "HezMaticMerge::_permit: NOT_VALID_CALL"
         );
         (
             address owner,
@@ -157,15 +161,15 @@ contract TokenBridge is Ownable {
         );
         require(
             owner == msg.sender,
-            "TokenBridge::_permit: PERMIT_OWNER_MUST_BE_THE_SENDER"
+            "HezMaticMerge::_permit: PERMIT_OWNER_MUST_BE_THE_SENDER"
         );
         require(
             spender == address(this),
-            "TokenBridge::_permit: SPENDER_MUST_BE_THIS"
+            "HezMaticMerge::_permit: SPENDER_MUST_BE_THIS"
         );
         require(
             value == _amount,
-            "TokenBridge::_permit: PERMIT_AMOUNT_DOES_NOT_MATCH"
+            "HezMaticMerge::_permit: PERMIT_AMOUNT_DOES_NOT_MATCH"
         );
 
         // we call without checking the result, in case it fails and he doesn't have enough balance

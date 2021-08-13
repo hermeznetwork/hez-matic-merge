@@ -25,10 +25,10 @@ async function main() {
   try {
     await hre.run("verify:verify",
       {
-        address: deployOutputParameters.tokenBridge,
+        address: deployOutputParameters.hezMaticMerge,
         constructorArguments: [
-          deployOutputParameters.tokenAAddress,
-          deployOutputParameters.manoloTokenAddress,
+          deployOutputParameters.hezTokenAddress,
+          deployOutputParameters.maticTokenAddress,
           deployOutputParameters.governanceAddress,
           deployOutputParameters.duration,
         ]
@@ -38,18 +38,18 @@ async function main() {
     expect(error.message).to.be.equal("Contract source code already verified");
   }
 
-  // verify tokenA
-  const tokenA = deployParameters.tokenA;
+  // verify hezToken
+  const hezToken = deployParameters.hezToken;
   try {
     // verify governance
     await hre.run("verify:verify",
       {
-        address: deployOutputParameters.tokenAAddress,
+        address: deployOutputParameters.hezTokenAddress,
         constructorArguments: [
-          tokenA.name,
-          tokenA.symbol,
-          tokenA.initialAccount || deployerAddress,
-          ethers.utils.parseEther(tokenA.initialAmount.toString()),
+          hezToken.name,
+          hezToken.symbol,
+          hezToken.initialAccount || deployerAddress,
+          ethers.utils.parseEther(hezToken.initialAmount.toString()),
         ]
       }
     );
@@ -57,18 +57,18 @@ async function main() {
     expect(error.message).to.be.equal("Contract source code already verified");
   }
 
-  // verify manoloToken
-  const manoloToken = deployParameters.manoloToken;
+  // verify maticToken
+  const maticToken = deployParameters.maticToken;
   try {
     // verify governance
     await hre.run("verify:verify",
       {
-        address: deployOutputParameters.manoloTokenAddress,
+        address: deployOutputParameters.maticTokenAddress,
         constructorArguments: [
-          manoloToken.name,
-          manoloToken.symbol,
-          manoloToken.initialAccount || deployerAddress,
-          ethers.utils.parseEther(manoloToken.initialAmount.toString()),
+          maticToken.name,
+          maticToken.symbol,
+          maticToken.initialAccount || deployerAddress,
+          ethers.utils.parseEther(maticToken.initialAmount.toString()),
         ]
       }
     );

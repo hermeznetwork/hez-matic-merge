@@ -1,4 +1,4 @@
-# token-merge
+# hez-matic-merge
 
 Smart contract implementation to merge two tokens
 
@@ -24,8 +24,8 @@ npm run test
 ## deploy on rinkeby
 
 ```
-npm run deploy:tokenBridge:rinkeby
-npm run verify:tokenBridge:rinkeby
+npm run deploy:HezMaticMergeTestnet:rinkeby
+npm run verify:HezMaticMerge:rinkeby
 ```
 
 ## License

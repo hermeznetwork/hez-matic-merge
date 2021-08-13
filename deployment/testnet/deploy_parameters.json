@@ -1,12 +1,12 @@
 {
-  "tokenA": {
-    "name": "A_Token",
-    "symbol": "AT",
+  "hezToken": {
+    "name": "Hermez Network Token",
+    "symbol": "HEZ",
     "initialAmount": 20000000
   },
-  "manoloToken": {
-    "name": "Manolo",
-    "symbol": "MAN",
+  "maticToken": {
+    "name": "Matic Token",
+    "symbol": "MATIC",
     "initialAmount": 20000000
   }
 }

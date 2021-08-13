@@ -32,6 +32,24 @@ module.exports = {
           }
         }
       },
+      {
+        version: "0.5.2",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999
+          }
+        }
+      },
+      {
+        version: "0.6.12",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999999
+          }
+        }
+      }
     ]
   },
   networks: {
@@ -66,7 +84,7 @@ module.exports = {
     },
   },
   etherscan: {
-    apiKey: `${process.env.ETHERSCAN_API_KEY}` 
+    apiKey: `${process.env.ETHERSCAN_API_KEY}`
   }
 };
 
