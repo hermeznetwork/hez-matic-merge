@@ -1,4 +1,8 @@
 const { ethers, upgrades } = require("hardhat");
+const fs = require("fs");
+const path = require("path");
+
+const pathOutputJson = path.join(__dirname, "./deploy_output.json");
 
 async function main() {
     const deployer = (await ethers.getSigners())[0].address;
@@ -45,6 +49,14 @@ async function main() {
     console.log("current timestamp:", currentTimestamp);
     console.log("duration", withdrawTimeout - currentTimestamp);
 
+    const outputJson = {
+        hezAddress: hezAddress,
+        maticAddress: maticAddress,
+        governanceAddress: governanceAddress,
+        duration: duration,
+        hezMaticMerge: HezMaticMerge.address
+    };
+    fs.writeFileSync(pathOutputJson, JSON.stringify(outputJson, null, 1));
 }
 
 main().catch(e => {

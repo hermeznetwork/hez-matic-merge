@@ -21,11 +21,18 @@ npm run setup
 npm run test
 ```
 
-## deploy on rinkeby
+## Deploy on rinkeby
 
 ```
 npm run deploy:HezMaticMergeTestnet:rinkeby
-npm run verify:HezMaticMerge:rinkeby
+npm run verify:HezMaticMergeTestnet:rinkeby
+```
+
+## Deploy on mainnet
+
+```
+npm run deploy:HezMaticMerge:mainnet
+npm run verify:HezMaticMerge:mainnet
 ```
 
 ## License

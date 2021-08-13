@@ -1,12 +1,8 @@
 {
-  "hezToken": {
-    "name": "Hermez Network Token",
-    "symbol": "HEZ",
-    "initialAmount": 20000000
-  },
   "maticToken": {
     "name": "Matic Token",
     "symbol": "MATIC",
     "initialAmount": 20000000
-  }
+  },
+  "hezTokenAddress": "0x2521Bc90B4f5Fb9a8D61278197e5FF5cDbc4FBF2"
 }

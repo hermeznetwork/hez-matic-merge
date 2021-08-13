@@ -10,29 +10,17 @@ async function main() {
     const deployer = (await ethers.getSigners())[0].address;
 
     /*
-        Parameters Tokens
+        Parameters MATIC
     */
-    const hezToken = deployParameters.hezToken
-    const hezTokenName = hezToken.name;
-    const hezTokenSymbol = hezToken.symbol;
-    const hezTokenInitialBalance = ethers.utils.parseEther(hezToken.initialAmount.toString());
-
     const maticToken = deployParameters.maticToken
     const maticTokenName = maticToken.name;
     const maticTokenSymbol = maticToken.symbol;
     const maticTokenInitialBalance = ethers.utils.parseEther(maticToken.initialAmount.toString());
 
     /*
-        Deployment Tokens
+        Deployment MATIC
     */
     const CustomERC20Factory = await ethers.getContractFactory("ERC20PermitMock");
-
-    hezTokenContract = await CustomERC20Factory.deploy(
-        hezTokenName,
-        hezTokenSymbol,
-        deployer,
-        hezTokenInitialBalance
-    );
 
     maticTokenContract = await CustomERC20Factory.deploy(
         maticTokenName,
@@ -44,7 +32,7 @@ async function main() {
     /*
         Parameters Bridge
     */
-    const hezTokenAddress = hezTokenContract.address;
+    const hezTokenAddress = deployParameters.hezTokenAddress;
     const maticTokenAddress = maticTokenContract.address;
     const governanceAddress = deployer;
     const duration = 7776000;  // 90 days * 24 hours * 3600 seconds = 7776000

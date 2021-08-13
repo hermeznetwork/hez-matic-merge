@@ -21,7 +21,7 @@ async function main() {
     throw new Error("Etherscan API KEY has not been defined");
   }
 
-  // verify bridge
+  // verify hezMaticMerge
   try {
     await hre.run("verify:verify",
       {
@@ -31,25 +31,6 @@ async function main() {
           deployOutputParameters.maticTokenAddress,
           deployOutputParameters.governanceAddress,
           deployOutputParameters.duration,
-        ]
-      }
-    );
-  } catch (error) {
-    expect(error.message).to.be.equal("Contract source code already verified");
-  }
-
-  // verify hezToken
-  const hezToken = deployParameters.hezToken;
-  try {
-    // verify governance
-    await hre.run("verify:verify",
-      {
-        address: deployOutputParameters.hezTokenAddress,
-        constructorArguments: [
-          hezToken.name,
-          hezToken.symbol,
-          hezToken.initialAccount || deployerAddress,
-          ethers.utils.parseEther(hezToken.initialAmount.toString()),
         ]
       }
     );

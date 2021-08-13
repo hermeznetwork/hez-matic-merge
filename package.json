@@ -4,11 +4,12 @@
     "compile": "npx hardhat compile",
     "setup": "npm i",
     "test": "npx hardhat test test/hezMaticMerge.test.js",
+    "deploy:HezMaticMergeTestnet:hardhat": "npx hardhat run deployment/testnet/deployHezMaticMergeTestnet.js --network hardhat",
     "deploy:HezMaticMergeTestnet:rinkeby": "npx hardhat run deployment/testnet/deployHezMaticMergeTestnet.js --network rinkeby",
-    "verify:HezMaticMergeTestnet:rinkeby": "npx hardhat run deployment/testnet/verifyHezMaticMerge.js --network rinkeby",
-    "deploy:HezMaticMergeTesnet:hardhat": "npx hardhat run deployment/testnet/deployHezMaticMergeTestnet.js --network hardhat",
+    "verify:HezMaticMergeTestnet:rinkeby": "npx hardhat run deployment/testnet/verifyHezMaticMergeTestnet.js --network rinkeby",
     "deploy:HezMaticMerge:hardhat": "npx hardhat run deployment/mainnet/deployHezMaticMerge.js --network hardhat",
-    "deploy:HezMaticMerge:mainnet": "npx hardhat run deployment/mainnet/deployHezMaticMerge.js --network mainnet"
+    "deploy:HezMaticMerge:mainnet": "npx hardhat run deployment/mainnet/deployHezMaticMerge.js --network mainnet",
+    "verify:HezMaticMerge:mainnet": "npx hardhat run deployment/mainnet/verifyHezMaticMerge.js --network mainnet"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
