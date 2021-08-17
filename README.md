@@ -2,7 +2,7 @@
 
 Smart contract implementation to merge two tokens
 
-[![Main CI](https://github.com/hermeznetwork/token-merge/actions/workflows/main.yml/badge.svg)](https://github.com/hermeznetwork/token-merge/actions/workflows/main.yml)
+[![Main CI](https://github.com/hermeznetwork/hez-matic-merge/actions/workflows/main.yml/badge.svg)](https://github.com/hermeznetwork/hez-matic-merge/actions/workflows/main.yml)
 
 ## Requirements
 
@@ -37,4 +37,4 @@ npm run verify:HezMaticMerge:mainnet
 
 ## License
 
-`hermeznetwork/token-merge` is part of the Hermez project copyright 2020 HermezDAO and published with GPL-3 license. Please check the LICENSE file for more details.
+`hermeznetwork/hez-matic-merge` is part of the Hermez project copyright 2020 HermezDAO and published with GPL-3 license. Please check the LICENSE file for more details.

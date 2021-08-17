@@ -22,7 +22,7 @@ contract HezMaticMerge is Ownable {
     IERC20 public immutable matic;
     
     // Governance address
-    address public governance;
+    address public immutable governance;
 
     // UNIX time in seconds when the owner will be able to withdraw the remaining MATIC tokens
     uint256 public withdrawTimeout;
@@ -88,6 +88,8 @@ contract HezMaticMerge is Ownable {
     /**
      * @notice Method that allows the owner to withdraw any token from this contract
      * In order to withdraw MATIC tokens the owner must wait until the withdrawTimeout expires
+     * @param tokenAddress Token address
+     * @param amount Amount of tokens to withdraw
      */
     function withdrawTokens(address tokenAddress, uint256 amount) public onlyOwner {
         if(tokenAddress == address(matic)) {
