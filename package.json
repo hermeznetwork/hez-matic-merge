@@ -8,6 +8,8 @@
     "deploy:HezMaticMergeTestnet:rinkeby": "npx hardhat run deployment/testnet/deployHezMaticMergeTestnet.js --network rinkeby",
     "verify:HezMaticMergeTestnet:rinkeby": "npx hardhat run deployment/testnet/verifyHezMaticMergeTestnet.js --network rinkeby",
     "deploy:HezMaticMerge:hardhat": "npx hardhat run deployment/mainnet/deployHezMaticMerge.js --network hardhat",
+    "deploy:HezMaticMerge:rinkeby": "npx hardhat run deployment/mainnet/deployHezMaticMerge.js --network rinkeby",
+    "verify:HezMaticMerge:rinkeby": "npx hardhat run deployment/mainnet/verifyHezMaticMerge.js --network rinkeby",
     "deploy:HezMaticMerge:mainnet": "npx hardhat run deployment/mainnet/deployHezMaticMerge.js --network mainnet",
     "verify:HezMaticMerge:mainnet": "npx hardhat run deployment/mainnet/verifyHezMaticMerge.js --network mainnet"
   },

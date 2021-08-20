@@ -12,8 +12,8 @@ async function main() {
     */
     const hezAddress = "0xEEF9f339514298C6A857EfCfC1A762aF84438dEE"
     const maticAddress = "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0"
-    const governanceAddress = "0xf1B3b124842555782F98bE08d1357ABb8013F11c"
-    const duration = 7776000;  // 90 days * 24 hours * 3600 seconds = 7776000
+    const governanceAddress = "0xee563F7B03dBfF86F7bD2E550763C5bBaEA89c34"
+    const duration = 0;
 
     /*
         Deployment
