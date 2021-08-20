@@ -65,7 +65,6 @@ describe("HezMaticMerge", function () {
     hezMaticMergeContract = await HezMaticMergeFactory.deploy(
       hermezTokenContract.address,
       maticTokenContract.address,
-      governance.address,
       duration
     );
 
@@ -75,7 +74,6 @@ describe("HezMaticMerge", function () {
   it("should check the constructor", async () => {
     expect(await hezMaticMergeContract.hez()).to.be.equal(hermezTokenContract.address);
     expect(await hezMaticMergeContract.matic()).to.be.equal(maticTokenContract.address);
-    expect(await hezMaticMergeContract.governance()).to.be.equal(governance.address);
     expect(await hezMaticMergeContract.SWAP_RATIO()).to.be.equal(swapRatio);
 
     const deployedTimestamp = (await ethers.provider.getBlock(hezMaticMergeContract.deployTransaction.blockNumber)).timestamp;
@@ -331,25 +329,55 @@ describe("HezMaticMerge", function () {
     expect(withdrawTimeout).to.be.lessThan(currentTimestamp)
 
     await expect(
-      hezMaticMergeContract.connect(deployer).setWithdrawTimeout(withdrawTimeout)
-    ).to.be.revertedWith("HezMaticMerge::setWithdrawTimeout: ONLY_GOVERNANCE_ALLOWED");
+      hezMaticMergeContract.connect(governance).setWithdrawTimeout(withdrawTimeout)
+    ).to.be.revertedWith("Ownable: caller is not the owner");
 
     await expect(
-      hezMaticMergeContract.connect(governance).setWithdrawTimeout(withdrawTimeout)
+      hezMaticMergeContract.connect(deployer).setWithdrawTimeout(withdrawTimeout)
     ).to.be.revertedWith("HezMaticMerge::setWithdrawTimeout: NEW_TIMEOUT_MUST_BE_HIGHER");
 
     await expect(
-      hezMaticMergeContract.connect(governance).setWithdrawTimeout(currentTimestamp)
+      hezMaticMergeContract.connect(deployer).setWithdrawTimeout(currentTimestamp)
     ).to.emit(hezMaticMergeContract, "NewWithdrawTimeout")
       .withArgs(currentTimestamp);
 
     await expect(
-      hezMaticMergeContract.connect(governance).setWithdrawTimeout(currentTimestamp + 3000)
+      hezMaticMergeContract.connect(deployer).setWithdrawTimeout(currentTimestamp + 3000)
     ).to.emit(hezMaticMergeContract, "NewWithdrawTimeout")
       .withArgs(currentTimestamp + 3000);
 
     await expect(
       hezMaticMergeContract.connect(deployer).withdrawTokens(maticTokenContract.address, maticTokenInitialBalance)
     ).to.be.revertedWith("HezMaticMerge::withdrawTokens: TIMEOUT_NOT_REACHED");
+  });
+
+  it("should be able to transfer ownership", async () => {
+    // send tokens to HezMaticMerge contract
+    await maticTokenContract.connect(deployer).transfer(hezMaticMergeContract.address, maticTokenInitialBalance);
+    await hermezTokenContract.connect(deployer).transfer(hezMaticMergeContract.address, hermezTokenInitialBalance);
+
+    // check current owner
+    expect(await hezMaticMergeContract.owner()).to.be.equal(deployer.address)
+
+    // transfer ownership
+    await expect(
+      hezMaticMergeContract.connect(governance).transferOwnership(governance.address)
+    ).to.be.revertedWith("Ownable: caller is not the owner");
+
+    await expect(hezMaticMergeContract.connect(deployer).transferOwnership(governance.address)
+    ).to.emit(hezMaticMergeContract, "OwnershipTransferred")
+      .withArgs(deployer.address, governance.address);
+
+    // check new owner premissions
+    expect(await hezMaticMergeContract.owner()).to.be.equal(governance.address)
+
+    await expect(
+      hezMaticMergeContract.connect(deployer).withdrawTokens(hermezTokenContract.address, 0)
+    ).to.be.revertedWith("Ownable: caller is not the owner");
+
+    await expect(
+      hezMaticMergeContract.connect(governance).withdrawTokens(hermezTokenContract.address, hermezTokenInitialBalance)
+    ).to.emit(hezMaticMergeContract, "WithdrawTokens")
+      .withArgs(hermezTokenContract.address, hermezTokenInitialBalance);
   });
 });

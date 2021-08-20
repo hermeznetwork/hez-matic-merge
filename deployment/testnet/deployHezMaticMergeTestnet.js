@@ -47,11 +47,20 @@ async function main() {
     console.log("duration:", duration)
 
     const HezMaticMergeFactory = await ethers.getContractFactory("HezMaticMerge");
-    const HezMaticMerge = await HezMaticMergeFactory.deploy(hezTokenAddress, maticTokenAddress, governanceAddress, duration);
+    const HezMaticMerge = await HezMaticMergeFactory.deploy(hezTokenAddress, maticTokenAddress, duration);
     await HezMaticMerge.deployed();
 
     console.log("#######################\n");
     console.log("HezMaticMerge deployed to:", HezMaticMerge.address);
+
+
+    console.log("\n#######################");
+    console.log("##### Transfer ownership #####");
+    console.log("#######################");
+
+    const txTransferOwnership = await HezMaticMerge.transferOwnership(governanceAddress)
+    const receipt = await txTransferOwnership.wait();
+    console.log("ownership transfered to the governance, txHash: ", receipt.transactionHash);
 
     console.log("\n#######################");
     console.log("#####    Checks    #####");
@@ -59,10 +68,10 @@ async function main() {
 
     console.log("hezTokenAddress:", await HezMaticMerge.hez());
     console.log("maticTokenAddress:", await HezMaticMerge.matic());
-    console.log("governanceAddress:", await HezMaticMerge.governance());
     console.log("SWAP_RATIO:", (await HezMaticMerge.SWAP_RATIO()).toNumber());
     console.log("withdrawTimeout:", (await HezMaticMerge.withdrawTimeout()).toNumber());
     console.log("current timestamp:", (await ethers.provider.getBlock()).timestamp);
+    console.log("owner", await HezMaticMerge.owner());
 
     console.log("\n#######################");
     console.log("#####   Send MATIC tokens to HezMaticMerge #####");

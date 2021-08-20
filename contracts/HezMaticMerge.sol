@@ -21,9 +21,6 @@ contract HezMaticMerge is Ownable {
     // MATIC token address
     IERC20 public immutable matic;
     
-    // Governance address
-    address public immutable governance;
-
     // UNIX time in seconds when the owner will be able to withdraw the remaining MATIC tokens
     uint256 public withdrawTimeout;
 
@@ -33,7 +30,7 @@ contract HezMaticMerge is Ownable {
     event HezToMatic(uint256 hezAmount, uint256 maticAmount, address indexed grantee);
 
     /**
-     * @dev Emitted when the governance increases the timeout
+     * @dev Emitted when the owner increases the timeout
      */
     event NewWithdrawTimeout(uint256 newWithdrawTimeout);
 
@@ -48,18 +45,15 @@ contract HezMaticMerge is Ownable {
      *      Once the withdrawTimeout is reached, the owner will be able to withdraw the remaining MATIC tokens.
      * @param _hez HEZ token address
      * @param _matic MATIC token address
-     * @param _governance Governance address
      * @param duration Time in seconds that the owner will not be able to withdraw the MATIC tokens
      */
     constructor (
         IERC20 _hez,
         IERC20 _matic,
-        address _governance,
         uint256 duration
     ){
         hez = _hez;
         matic = _matic;
-        governance = _governance;
         withdrawTimeout = block.timestamp + duration;
     }
 
@@ -105,14 +99,10 @@ contract HezMaticMerge is Ownable {
     }
 
     /**
-     * @notice Method that allows the governance to increase the withdraw timeout
+     * @notice Method that allows the owner to increase the withdraw timeout
      * @param newWithdrawTimeout new withdraw timeout
      */
-    function setWithdrawTimeout(uint256 newWithdrawTimeout) public {
-        require(
-            msg.sender == governance,
-             "HezMaticMerge::setWithdrawTimeout: ONLY_GOVERNANCE_ALLOWED"
-        );
+    function setWithdrawTimeout(uint256 newWithdrawTimeout) public onlyOwner {
         require(
             newWithdrawTimeout > withdrawTimeout,
              "HezMaticMerge::setWithdrawTimeout: NEW_TIMEOUT_MUST_BE_HIGHER"

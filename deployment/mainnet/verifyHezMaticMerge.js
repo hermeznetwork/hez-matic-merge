@@ -26,7 +26,6 @@ async function main() {
         constructorArguments: [
           deployOutputParameters.hezAddress,
           deployOutputParameters.maticAddress,
-          deployOutputParameters.governanceAddress,
           deployOutputParameters.duration,
         ]
       }

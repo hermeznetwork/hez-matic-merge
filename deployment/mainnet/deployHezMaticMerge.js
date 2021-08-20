@@ -28,11 +28,19 @@ async function main() {
     console.log("duration:", duration)
 
     const HezMaticMergeFactory = await ethers.getContractFactory("HezMaticMerge");
-    const HezMaticMerge = await HezMaticMergeFactory.deploy(hezAddress, maticAddress, governanceAddress, duration);
+    const HezMaticMerge = await HezMaticMergeFactory.deploy(hezAddress, maticAddress, duration);
     await HezMaticMerge.deployed();
 
     console.log("#######################\n");
     console.log("HezMaticMerge deployed to:", HezMaticMerge.address);
+
+    console.log("\n#######################");
+    console.log("##### Transfer ownership #####");
+    console.log("#######################");
+
+    const txTransferOwnership = await HezMaticMerge.transferOwnership(governanceAddress)
+    const receipt = await txTransferOwnership.wait();
+    console.log("ownership transfered to the governance, txHash: ", receipt.transactionHash);
 
     console.log("\n#######################");
     console.log("#####    Checks    #####");
@@ -40,7 +48,6 @@ async function main() {
 
     console.log("hezAddress:", await HezMaticMerge.hez());
     console.log("maticAddress:", await HezMaticMerge.matic());
-    console.log("governanceAddress:", await HezMaticMerge.governance());
     console.log("SWAP_RATIO:", (await HezMaticMerge.SWAP_RATIO()).toNumber());
 
     const withdrawTimeout = (await HezMaticMerge.withdrawTimeout()).toNumber()
@@ -48,6 +55,7 @@ async function main() {
     const currentTimestamp = (await ethers.provider.getBlock()).timestamp
     console.log("current timestamp:", currentTimestamp);
     console.log("duration", withdrawTimeout - currentTimestamp);
+    console.log("owner", await HezMaticMerge.owner());
 
     const outputJson = {
         hezAddress: hezAddress,
